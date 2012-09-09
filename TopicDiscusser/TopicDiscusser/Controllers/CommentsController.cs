@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using TopicDiscusser.Models;
 
@@ -10,45 +14,96 @@ namespace TopicDiscusser.Controllers
 {
     public class CommentsController : ApiController
     {
-        /// <summary>
-        /// Gets list of all comments associated with a given topic.
-        /// The comments are arranged in descending order.
-        /// </summary>
-        /// <param name="topicId"></param>
-        /// <returns></returns>
-        public IEnumerable<Comment> Get(int topicId)
+        //TODO: repository approach for testing
+        private TopicDiscusserContext db = new TopicDiscusserContext();
+
+        // GET api/Comments
+        public IEnumerable<Comment> GetComments()
         {
-            return null;
+            return db.Comments.AsEnumerable();
         }
 
-        /// <summary>
-        /// Creates a new comment for a given topic.
-        /// </summary>
-        /// <param name="topicId"></param>
-        /// <returns></returns>
-        public HttpResponseMessage Post(int topicId)
+        // GET api/Comments/5
+        public Comment GetComment(int id)
         {
-            return null;
+            Comment comment = db.Comments.Find(id);
+            if (comment == null)
+            {
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+            }
+
+            return comment;
         }
 
-        /// <summary>
-        /// Update a given comment.
-        /// </summary>
-        /// <param name="id">Comment id</param>
-        /// <param name="comment">Updated comment</param>
-        public HttpResponseMessage Put(int id, Comment comment)
+        // PUT api/Comments/5
+        public HttpResponseMessage PutComment(int id, Comment comment)
         {
-            return null;
+            if (ModelState.IsValid && id == comment.Id)
+            {
+                db.Entry(comment).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
         }
 
-        /// <summary>
-        /// Deletes a given comment
-        /// </summary>
-        /// <param name="id">Comment id</param>
-        /// <returns></returns>
-        public HttpResponseMessage Delete(int id)
+        // POST api/Comments
+        public HttpResponseMessage PostComment(Comment comment)
         {
-            return null;
+            if (ModelState.IsValid)
+            {
+                db.Comments.Add(comment);
+                db.SaveChanges();
+
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, comment);
+                response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = comment.Id }));
+                return response;
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
+        }
+
+        // DELETE api/Comments/5
+        public HttpResponseMessage DeleteComment(int id)
+        {
+            Comment comment = db.Comments.Find(id);
+            if (comment == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            db.Comments.Remove(comment);
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, comment);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

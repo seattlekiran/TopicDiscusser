@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using TopicDiscusser.Models;
 
@@ -10,49 +14,100 @@ namespace TopicDiscusser.Controllers
 {
     public class TopicsController : ApiController
     {
-        // GET api/topics
-        public IEnumerable<Topic> Get()
+        private TopicDiscusserContext db = new TopicDiscusserContext();
+
+        //TODO: repository pattern
+        public TopicsController()
         {
-            return null;
         }
 
-        /// <summary>
-        /// Gets a topic of  athe given id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public Topic Get(int id)
+        // GET api/Topics
+        public IEnumerable<Topic> GetTopics()
         {
-            return null;
+            return db.Topics.Include("Comments").AsEnumerable();
         }
 
-        /// <summary>
-        /// Creates a new topic
-        /// </summary>
-        /// <param name="topic"></param>
-        /// <returns></returns>
-        public HttpResponseMessage Post(Topic topic)
+        // GET api/Topics/5
+        public Topic GetTopic(int id)
         {
-            return null;
+            Topic topic = db.Topics.Find(id);
+            if (topic == null)
+            {
+                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+            }
+
+            return topic;
         }
 
-        /// <summary>
-        /// Updates topic details like : title, description, attachments
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="topic"></param>
-        public HttpResponseMessage Put(int id, Topic topic)
+        // PUT api/Topics/5
+        public HttpResponseMessage PutTopic(int id, Topic topic)
         {
-            return null;
+            if (ModelState.IsValid && id == topic.Id)
+            {
+                db.Entry(topic).State = EntityState.Modified;
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
         }
 
-        /// <summary>
-        /// Deletes a topic
-        /// </summary>
-        /// <param name="id"></param>
-        public HttpResponseMessage Delete(int id)
+        // POST api/Topics
+        public HttpResponseMessage PostTopic(Topic topic)
         {
-            return null;
+            if (ModelState.IsValid)
+            {
+                db.Topics.Add(topic);
+                db.SaveChanges();
+
+                HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, topic);
+                response.Headers.Location = new Uri(Url.Link("DefaultApi", new { id = topic.Id }));
+                return response;
+            }
+            else
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest);
+            }
+        }
+
+        // DELETE api/Topics/5
+        public HttpResponseMessage DeleteTopic(int id)
+        {
+            Topic topic = db.Topics.Find(id);
+            if (topic == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            db.Topics.Remove(topic);
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound);
+            }
+
+            return Request.CreateResponse(HttpStatusCode.OK, topic);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
