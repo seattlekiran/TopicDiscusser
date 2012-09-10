@@ -24,13 +24,15 @@ namespace TopicDiscusser.Controllers
         // GET api/Topics
         public IEnumerable<Topic> GetTopics()
         {
-            return db.Topics.Include("Comments").AsEnumerable();
+            return db.Topics.AsEnumerable();
         }
 
         // GET api/Topics/5
         public Topic GetTopic(int id)
         {
+            //TODO: include Comments details too
             Topic topic = db.Topics.Find(id);
+
             if (topic == null)
             {
                 throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
