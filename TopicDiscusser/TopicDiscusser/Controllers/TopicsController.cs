@@ -30,6 +30,7 @@ namespace TopicDiscusser.Controllers
         // GET api/Topics/5
         public Topic GetTopic(int id)
         {
+            //TODO: change to query expression
             Topic topic = db.Topics
                                 .Where(tpc => tpc.Id == id)
                                 .Include("Comments")
@@ -43,15 +44,28 @@ namespace TopicDiscusser.Controllers
             return topic;
         }
 
-        // PUT api/Topics/5
-        public HttpResponseMessage PutTopic(int id, Topic topic)
+        public HttpResponseMessage PutVote(int id, string vote)
         {
-            if (ModelState.IsValid && id == topic.Id)
+            if (ModelState.IsValid)
             {
-                db.Entry(topic).State = EntityState.Modified;
+                Topic topic = db.Topics.Find(id);
+
+                if (topic == null)
+                {
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
+                }
 
                 try
                 {
+                    if (vote.ToLowerInvariant() == "up")
+                    {
+                        topic.Votes += 1;
+                    }
+                    else if (vote.ToLowerInvariant() == "down")
+                    {
+                        topic.Votes -= 1;
+                    }
+
                     db.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -66,6 +80,30 @@ namespace TopicDiscusser.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest);
             }
         }
+
+        // PUT api/Topics/5
+        //public HttpResponseMessage PutTopic(int id, Topic topic)
+        //{
+        //    if (ModelState.IsValid && id == topic.Id)
+        //    {
+        //        db.Entry(topic).State = EntityState.Modified;
+
+        //        try
+        //        {
+        //            db.SaveChanges();
+        //        }
+        //        catch (DbUpdateConcurrencyException)
+        //        {
+        //            return Request.CreateResponse(HttpStatusCode.NotFound);
+        //        }
+
+        //        return Request.CreateResponse(HttpStatusCode.OK);
+        //    }
+        //    else
+        //    {
+        //        return Request.CreateResponse(HttpStatusCode.BadRequest);
+        //    }
+        //}
 
         // POST api/Topics
         public HttpResponseMessage PostTopic(Topic topic)

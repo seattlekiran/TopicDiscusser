@@ -8,26 +8,31 @@
     <script type="text/javascript">
         function TopicsViewModel() {
             var self = this;
-            self.loaded = ko.observable(false);
             self.topics = ko.observableArray([]);
 
-            //self.createContactFromForm = function (formElement) {
-            //    // If valid, post the serialized form data to the web api
-            //    $(formElement).validate();
-            //    if ($(formElement).valid()) {
-            //        $.post("api/contacts", $(formElement).serialize(), "json")
-            //            .done(function (newContact) { self.contacts.push(newContact); });
-            //    }
-            //}
-            //self.removeContact = function (contact) {
-            //    // First remove from the server, then from the UI
-            //    $.ajax({ type: "DELETE", url: contact.Self })
-            //        .done(function () { self.contacts.remove(contact); });
-            //}
+            self.voteUp = function (data) {
+                $.ajax({
+                    type: "PUT",
+                    url: data.SelfLink + '?vote=up',
+                    success: function () {
+                        data.Votes += 1;
+                    }
+                });
+            }
+
+            self.voteDown = function (data) {
+                $.ajax({
+                    type: "PUT",
+                    url: data.SelfLink + '?vote=down',
+                    success: function () {
+                        data.Votes -= 1;
+                    }
+                });
+            }
 
             // Load the initial state
             $.getJSON("api/topics", self.topics)
-                .done(function () { self.loaded(true); });
+                .done(function () {  });
         }
 
         ko.applyBindings(new TopicsViewModel());
@@ -40,6 +45,9 @@
             <span data-bind="text: Title" style="font-size: large"></span><br/>
             <span data-bind="text: Description"></span><br/>
             <span data-bind="text: Votes"></span><br />
+            <button data-bind="click: $parent.voteUp">Up</button>
+            <button data-bind="click: $parent.voteDown">Down</button>
+            <br />
         </li>
     </ul>
 </div>
