@@ -18,21 +18,17 @@ namespace TopicDiscusser.MessageHandlers
 
                     if (response.IsSuccessStatusCode && response.Content != null)
                     {
-                        var routeData = request.GetRouteData();
-                        var controller = routeData.Values["controller"];
-                        var urlHelper = request.GetUrlHelper();
-
                         Topic topic = null;
-                        Comment comment = null;
                         IEnumerable<Topic> topics = null;
 
                         if (response.TryGetContentValue<Topic>(out topic))
                         {
-                            topic.SelfLink = new Uri(urlHelper.Route("DefaultApi", new { controller = controller, id = topic.Id }), UriKind.Relative);
+                            GenerateLinksForTopic(topic, request);
                         }
-                        else if (response.TryGetContentValue<Comment>(out comment))
+                        else if (response.TryGetContentValue<IEnumerable<Topic>>(out topics))
                         {
-                            comment.SelfLink = new Uri(urlHelper.Route("DefaultApi", new { controller = controller, id = comment.Id }), UriKind.Relative);
+                            var objectContent = (ObjectContent<IEnumerable<Topic>>)response.Content;
+                            objectContent.Value = topics.Select(tpc => GenerateLinksForTopic(tpc, request));
                         }
                     }
 
@@ -40,5 +36,26 @@ namespace TopicDiscusser.MessageHandlers
                 });
         }
 
+        private static Topic GenerateLinksForTopic(Topic topic, HttpRequestMessage request)
+        {
+            var routeData = request.GetRouteData();
+            var controller = routeData.Values["controller"];
+            var urlHelper = request.GetUrlHelper();
+
+            topic.SelfLink = new Uri(urlHelper.Route("DefaultApi", new { controller = controller, id = topic.Id }), UriKind.Relative);
+
+            if (topic.Comments != null && topic.Comments.Count > 0)
+            {
+                topic.Comments = new List<Comment>(topic.Comments.Select((cmt) =>
+                {
+                    cmt.SelfLink = new Uri(urlHelper.Route("DefaultApi", new { controller = controller, id = cmt.Id }), UriKind.Relative);
+                    cmt.TopicLink = new Uri(urlHelper.Route("DefaultApi", new { controller = "topics", id = cmt.TopicId }), UriKind.Relative);
+
+                    return cmt;
+                }));
+            }
+
+            return topic;
+        }
     }
 }

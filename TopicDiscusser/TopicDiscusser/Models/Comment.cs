@@ -33,9 +33,8 @@ namespace TopicDiscusser.Models
         [DataMember]
         public Uri SelfLink { get; set; }
 
-        //TODO: provide a topic link
-        //[DataMember]
-        //public Uri TopicLink { get; set; }
+        [DataMember]
+        public Uri TopicLink { get; set; }
 
         public int TopicId { get; set; }
 

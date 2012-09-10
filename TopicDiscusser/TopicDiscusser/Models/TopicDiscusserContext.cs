@@ -39,6 +39,8 @@ namespace TopicDiscusser.Models
             this.Property(topic => topic.CreatedBy).HasMaxLength(25);
             this.Property(topic => topic.LastUpdatedBy).HasMaxLength(25);
             this.Ignore(topic => topic.SelfLink);
+            
+            //relationships
             this.HasMany(topic => topic.Comments).WithRequired(comment => comment.Topic);
         }
     }
@@ -51,6 +53,7 @@ namespace TopicDiscusser.Models
             this.Property(comment => comment.CreatedBy).HasMaxLength(25);
             this.Property(comment => comment.UpdatedBy).HasMaxLength(25);
             this.Ignore(comment => comment.SelfLink);
+            this.Ignore(comment => comment.TopicLink);
         }
     }
 }

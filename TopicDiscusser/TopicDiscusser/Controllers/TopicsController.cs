@@ -30,8 +30,10 @@ namespace TopicDiscusser.Controllers
         // GET api/Topics/5
         public Topic GetTopic(int id)
         {
-            //TODO: include Comments details too
-            Topic topic = db.Topics.Find(id);
+            Topic topic = db.Topics
+                                .Where(tpc => tpc.Id == id)
+                                .Include("Comments")
+                                .FirstOrDefault();
 
             if (topic == null)
             {
