@@ -195,8 +195,10 @@
     <Compile Include="MessageHandlers\LinkGenerationHandler.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\Comment.cs" />
+    <Compile Include="Models\Tag.cs" />
     <Compile Include="Models\Topic.cs" />
     <Compile Include="Models\TopicDiscusserContext.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

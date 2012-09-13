@@ -12,6 +12,7 @@ namespace TopicDiscusser.Models
         public Topic()
         {
             this.Comments = new List<Comment>();
+            this.Tags = new List<Tag>();
         }
 
         [DataMember]
@@ -25,6 +26,9 @@ namespace TopicDiscusser.Models
 
         [DataMember]
         public int Votes { get; set; }
+
+        [DataMember]
+        public List<Tag> Tags { get; set; }
 
         //TODO: this should be db generated and that too
         //only during creation of this record

@@ -55,6 +55,15 @@ namespace TopicDiscusser.MessageHandlers
                 }));
             }
 
+            if (topic.Tags != null && topic.Tags.Count > 0)
+            {
+                topic.Tags = new List<Tag>(topic.Tags.Select((tag) =>
+                {
+                    tag.SelfLink = new Uri(urlHelper.Route("DefaultApi", new { controller = controller, tags = tag.Name }), UriKind.Relative);
+                    return tag;
+                }));
+            }
+
             return topic;
         }
     }
