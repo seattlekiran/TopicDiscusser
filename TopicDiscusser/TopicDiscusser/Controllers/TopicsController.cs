@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using TopicDiscusser.Filters;
 using TopicDiscusser.Models;
 
 namespace TopicDiscusser.Controllers
@@ -21,13 +22,12 @@ namespace TopicDiscusser.Controllers
         {
         }
 
-        // GET api/Topics
+        [Queryable]
         public IEnumerable<Topic> GetTopics()
         {
             return db.Topics.AsEnumerable();
         }
 
-        // GET api/Topics/5
         public Topic GetTopic(int id)
         {
             //TODO: change to query expression
@@ -44,6 +44,7 @@ namespace TopicDiscusser.Controllers
             return topic;
         }
 
+        [AuthorizeFilter]
         public HttpResponseMessage PutVote(int id, string vote)
         {
             if (ModelState.IsValid)
@@ -106,6 +107,8 @@ namespace TopicDiscusser.Controllers
         //}
 
         // POST api/Topics
+
+        [AuthorizeFilter]
         public HttpResponseMessage PostTopic(Topic topic)
         {
             if (ModelState.IsValid)
@@ -123,7 +126,7 @@ namespace TopicDiscusser.Controllers
             }
         }
 
-        // DELETE api/Topics/5
+        [AuthorizeFilter]
         public HttpResponseMessage DeleteTopic(int id)
         {
             Topic topic = db.Topics.Find(id);
